@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+   <title>Hola mundo</title>
+</head>
+
+<body>
+   <h1> Hola Mundo </h1>
+   <table style="border: 1px solid">
+      <thead>
+         <tr>
+            <!-- FILA (TABLEROW) -->
+            <th style="text-align: left;">ID</th>
+            <!-- style atributo del elemento, EN CELESTE CSS, despues de los : el valor  -->
+            <th style="text-align: left;">NAME</th>
+         </tr>
+      </thead> <!-- -->
+      <tbody>
+
+        <!-- lo vaciamos porque ya podes agrregar pero tambien podriamos hardcodear y agregar predeterminados -->
+
+      </tbody>
+      <tfoot>
+         <tr>
+            <td><input></td>
+            <td><input></td>
+            <td><button onclick="add()">ADD</button></td>
+            <!--basicamente le pongo un evento al boton onclick que seria cuando toca el add -->
+         </tr> <!-- -->
+      </tfoot>
+
+   </table>
+   <!--en el script va esta el codigo de programacion en javascript -->
+   <script>
+      //js tiene funciones integradas como alert("") que es una ventana modal con texto se puede ir usando para ver si funcionan las funciones
+      alert("holaaa")
+
+      window.onload = () => { // cuando se cargue la pagina, se ejecuta el codigo dentro de la fun anonima ...  
+         // () => { esto es la funcion anonima
+         document.getElementsByTagName('input')[0].focus() // DCOMENT es la pagina en blanco y basicamente dice en el elementos input buscar el primer el elemento como un array en la psicion 0 y dsp focous es una funcion ya integrada que pone el click ahi
+      }
+      //creamos funcion add para el boton 
+      function add() {
+         var datos = document.getElementsByTagName('input')[0].value//accedo al input y uso value para acceder al dato
+         var datos1 = document.getElementsByTagName('input')[1].value
+         var tbody = document.getElementsByTagName('tbody')[0]//guardo el tbody en una variable
+         var row = tbody.insertRow() //le inserto una fila a la tabla y tambien la devuelve un elemento html esto lo guardo en una var
+         var cell = row.insertCell() //a la row le incerto una cell esto devuelve un elemento html al igual que insertRow
+         cell.innerHTML = datos      //en la cell ya creada y uso innerHTML que basicamente es donde estan los datos de x elemento html y le inserto el valor del input que esta en la var
+         //creo otra cell y le doy los datos
+         var cell = row.insertCell()
+         cell.innerHTML = datos1
+         
+         
+      
+        //borro y pongo el focus de nuevo
+         clear()
+
+      }
+
+      function clear() //funcion para borrar itero los elementos y le resteo el valor 
+      {
+         document.getElementsByTagName('input')[0].value = ''
+         document.getElementsByTagName('input')[1].value = ''
+         document.getElementsByTagName('input')[0].focus()
+      }
+
+
+
+   </script>
+
+</body>
+
+</html>
