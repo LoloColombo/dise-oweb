@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html> 
+   <head> 
+   <title>Hola mundo</title>
+   </head>
+   <body>
+   <h1> Hola Mundo </h1>
+   <table>
+      <thead>
+         <tr><!-- FILA (TABLEROW) -->
+            <th style="text-align: left;">ID</th> <!-- style atributo del elemento, EN CELESTE CSS, despues de los : el valor  -->
+            <th style="text-align: left;">NAME</th>
+         </tr>
+         <th></th>
+      </thead> <!-- -->
+      <tbody>
+         
+            <tr>
+               <td >1</td> <!--<td style="text-align: center;">1</td>   // para centrar el texto -->
+               <td>LOLO</td>
+               <td></td>
+            </tr>
+            <tr>
+               <td>2</td>
+               <td>YAMI</td>
+               <td></td>
+            </tr>
+
+      </tbody>
+      <tfoot>
+         <tr>
+            <td><input></td>
+            <td><input></td>
+            <td><button>ADD</button></td>
+         </tr>
+      </tfoot>
+
+   </table>
+   <!--en el script va esta el codigo de programacion en java -->
+   <script> 
+       window.onload = () => { // cuando se cargue la pagina, se ejecuta el codigo dentro de los {} ...  
+       // () => { esto es la funcion anonima
+         document.getElementsByTagName('input')[0].focus() // DCOMENT es la pagina en blanco 
+      }
+   </script>
+   </body>
+</html>
