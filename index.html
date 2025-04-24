@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+     <button onclick="callPromise()" >call promise</button>
+
+    <script>
+
+        var url="https://api.restful-api.dev/objects"
+
+        var testPromise = new Promise((resolve, reject)=>{
+            var request = new XMLHttpRequest()
+            request.open("GET", url)
+            request.responseType="json"
+            request.onload = () => {
+                if(request.status == 200){
+                    resolve(request.response)
+                } else{
+                    reject("algo salio mal")
+                }
+            }
+            request.onerror = function(){
+                reject("error de red")
+            }
+            request.send()
+
+        });
+
+       function callPromise(){
+           testPromise.then(reponse => {
+               console.log(reponse)
+               alert(reponse[2].name)
+
+           })
+           .catch(error => {
+               console.log(error)
+               alert(error)
+           })
+       }
+        
+
+    </script>
+</body>
+</html>
