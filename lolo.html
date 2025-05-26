@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+<body>
+    <table id="table">
+        <thead id="theadTable">
+            <tr>id</tr>
+            <tr>nombre</tr>
+        </thead>
+        <tbody id="tbodytable">
+        
+        </tbody>
+    </table>
+    <form id="form">
+        <input id="nameInput"type="text"> 
+        <button type="submit"> add </button>
+    </form>
+    <label> Actualizar </label>
+    <input id="NewNameInput"type="text">  
+
+
+<script>
+const url = 'https://api.restful-api.dev/objects'
+        async function getElementns(){
+        
+        try{
+            const response = await fetch(url)
+            if(!response.ok){
+            throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const results = await response.json();
+            console.log('exito en el llamado')
+            return results
+
+        }catch(error){ 
+            alert(`No se pudo mostrar los elementos por el ${error}`)
+            console.log(error)
+
+        }
+        }
+
+
+        function showData(data){
+            const tbody = document.getElementById('tbodytable')
+            tbody.innerHTML = ''
+
+            data.forEach(item => {
+            const fila = document.createElement('tr')
+                fila.innerHTML = ` <td>${item.id}</td>  <td>${item.name}</td> `
+                tbody.appendChild(fila)
+                
+            });
+
+
+            
+        }
+
+        async function start() {
+            const data = await getElementns()
+            showData(data)
+        }
+
+
+
+        
+        async function addElement(movilData){
+        
+        try{
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(movilData)
+                })
+                if(!response.ok){
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            const newMovil = await response.json();
+            console.log('exito al crear un dipositivo')
+            return newMovil
+
+        }catch(error){
+            alert(`No se pudo agregar el elemento por el ${error}`)
+            console.log(error)
+        }
+        }
+
+        async function addObject(event){
+            event.preventDefault(); 
+            const newMovilData = {
+                name: document.getElementById('nameInput').value
+            };
+            try{
+                const createdElement = await addElement(newMovilData)
+                const tbody = document.getElementById('tbodytable')
+                const fila = document.createElement('tr')
+                const idValor = createdElement.id
+                fila.id = idValor
+                fila.innerHTML = ` <td id='id.${idValor}' >${createdElement.id}</td> <td id='name.${idValor}'>${createdElement.name}</td> 
+                <button onclick="deleteObject('${idValor}')"> delete </button>     <button onclick="updateObject('${idValor}')"> update </button> `
+                tbody.appendChild(fila)
+
+            }catch(error){
+            alert(`No se pudo agregar el elemento por el ${error}`)
+            console.log(error)
+            }
+
+        }
+        document.getElementById('form').addEventListener('submit',addObject);
+
+
+
+
+
+        async function updateElement(id, newData){
+            try{
+                const response = await fetch(url + `/${id}` , {
+                    method:'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newData)
+                })
+                if(!response.ok){
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const updateObject = await response.json()
+                console.log('exito al actualizar un objeto')
+                return updateObject
+            }catch(error){
+            alert(`No se pudo actualizar el elemento por el  ${error}`)
+            console.log(error)
+            }
+        }
+        async function updateObject(id){
+                const newMovilData = {
+                name: document.getElementById('NewNameInput').value
+            };
+            try{
+            const objectValue = await updateElement(id, newMovilData)
+            document.getElementById(`id.${id}`).innerHTML = objectValue.id
+            document.getElementById(`name.${id}`).innerHTML = objectValue.name
+            }catch(error){
+            alert(`No se pudo actualizar el elemento por el ${error}`)
+            console.log(error)
+            }
+            
+        }
+
+
+
+        async function deleteElement(id) {
+            try{
+                const response = await fetch(url + `/${id}`, {
+                    method: 'DELETE'
+                })
+                if(!response.ok){
+                    throw new Error(`HTTP error! status: ${response.status}`);                    
+                }
+                console.log('Exito al eliminar un elemento')
+                return true
+            }catch(error){
+            alert(`No se pudo eliminar el elemento por el  ${error}`)
+            console.error(error)
+            return false
+            }
+        }
+        async function deleteObject(id) {
+            try{
+            const result = await deleteElement(id)
+            if(result){
+                const DeleteRow = document.getElementById(id)
+                DeleteRow.remove()
+                }
+
+            }catch(error){
+            alert(`No se pudo eliminar el elemento por el  ${error}`)
+            console.error(error)
+            }
+        }
+
+        //al empezar el codigo 
+        start()
+    </script>
+</body>
+</html>
