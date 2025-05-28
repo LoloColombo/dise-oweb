@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPentegable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            color: #0056b3;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+        }
+
+        button.add-button {
+            background-color: #28a745;
+        }
+
+        button.add-button:hover {
+            background-color: #218838;
+        }
+
+        button.delete-button {
+            background-color: #dc3545;
+            margin-right: 5px;
+        }
+
+        button.delete-button:hover {
+            background-color: #c82333;
+        }
+
+        button.update-button {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        button.update-button:hover {
+            background-color: #e0a800;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Object List</h1>
+        <table id="objectTable">
+            <thead id="tableHead">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <h2>Add New Object</h2>
+        <form id="objectForm">
+            <div class="form-group">
+                <label for="nameInput">Object Name:</label>
+                <input id="nameInput" type="text" placeholder="Enter object name">
+            </div>
+            <button type="submit" class="add-button">Add Object</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Update Object</h2>
+        <div class="form-group">
+            <label for="newNameInput">New Name:</label>
+            <input id="newNameInput" type="text" placeholder="Enter new name for update">
+        </div>
+        <p>Click "Update" next to an item in the table to apply the new name.</p>
+    </div>
+
+    <script>
+        const url = 'https://api.restful-api.dev/objects';
+
+        async function GetElements() {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const results = await response.json();
+                console.log('Successfully fetched elements');
+                return results;
+            } catch (error) {
+                alert(`Could not display elements due to: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function ShowData(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; 
+
+            if (data && data.length > 0) {
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.id = `row-${item.id}`; 
+                    row.innerHTML = `
+                        <td id='id-${item.id}'>${item.id}</td>
+                        <td id='name-${item.id}'>${item.name}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="3">No objects to display.</td></tr>';
+            }
+        }
+
+        async function CallShowData() {
+            const data = await GetElements();
+            ShowData(data);
+        }
+
+        async function AddElement(mobileData) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mobileData)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const newMobile = await response.json();
+                console.log('Successfully created a device');
+                return newMobile;
+            } catch (error) {
+                alert(`Could not add element due to: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        async function UseAddElement(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('nameInput');
+            const newMobileName = nameInput.value.trim();
+
+            if (!newMobileName) {
+                alert('ERROR: Please enter a name to add.');
+                console.log('ERROR: Please enter a name to add.');
+                nameInput.focus()
+                return;
+            }
+
+            const newMobileData = {
+                name: newMobileName
+            };
+
+            try {
+                const createdElement = await AddElement(newMobileData);
+                if (createdElement) {
+                    const tableBody = document.getElementById('tableBody');
+                    const newRow = document.createElement('tr');
+                    newRow.id = `row-${createdElement.id}`;
+                    newRow.innerHTML = `
+                        <td id='id-${createdElement.id}'>${createdElement.id}</td>
+                        <td id='name-${createdElement.id}'>${createdElement.name}</td>
+                        <td class="action-buttons">
+                            <button onclick="UseDeleteElement('${createdElement.id}')" class="delete-button">Delete</button>
+                            <button onclick="UseUpdateElement('${createdElement.id}')" class="update-button">Update</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(newRow);
+                    ClearInputs();
+                }
+            } catch (error) {
+                alert(`Could not add the element due to: ${error.message}`);
+                console.error(error);
+            }
+        }
+        document.getElementById('objectForm').addEventListener('submit', UseAddElement);
+
+        async function UpdateElement(id, newData) {
+            try {
+                const response = await fetch(`${url}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newData)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const updatedObject = await response.json();
+                console.log('Successfully updated an object');
+                return updatedObject;
+            } catch (error) {
+                alert(`Could not update element due to: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        async function UseUpdateElement(id) {
+            const newNameInput = document.getElementById('newNameInput');
+            const newMobileName = newNameInput.value.trim();
+
+            if (!newMobileName) {
+                alert('ERROR: Please enter a name to update.');
+                console.log('ERROR: Please enter a name to update.');
+                newNameInput.focus()
+                return;
+            }
+
+            const newMobileData = {
+                name: newMobileName
+            };
+
+            try {
+                const objectValue = await UpdateElement(id, newMobileData);
+                if (objectValue) {
+                    document.getElementById(`id-${id}`).innerHTML = objectValue.id;
+                    document.getElementById(`name-${id}`).innerHTML = objectValue.name;
+                    ClearInputs();
+                }
+            } catch (error) {
+                alert(`Could not update the element due to: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        async function DeleteElement(id) {
+            try {
+                const response = await fetch(`${url}/${id}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                console.log('Successfully deleted an element');
+                return true;
+            } catch (error) {
+                alert(`Could not delete element due to: ${error.message}`);
+                console.error(error);
+                return false;
+            }
+        }
+
+        async function UseDeleteElement(id) {
+            try {
+                const result = await DeleteElement(id);
+                if (result) {
+                    const rowToDelete = document.getElementById(`row-${id}`);
+                    if (rowToDelete) {
+                        rowToDelete.remove();
+                    }
+                }
+            } catch (error) {
+                alert(`Could not delete the element due to: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function ClearInputs() {
+            document.getElementById('nameInput').value = '';
+            document.getElementById('newNameInput').value = '';
+        }
+
+        // Initialize the application
+        CallShowData();
+    </script>
+</body>
+</html>
