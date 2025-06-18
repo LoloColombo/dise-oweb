@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPentegable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            color: #0056b3;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+        }
+
+        button.add-button {
+            background-color: #28a745;
+        }
+
+        button.add-button:hover {
+            background-color: #218838;
+        }
+
+        button.delete-button {
+            background-color: #dc3545;
+            margin-right: 5px;
+        }
+
+        button.delete-button:hover {
+            background-color: #c82333;
+        }
+
+        button.update-button {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        button.update-button:hover {
+            background-color: #e0a800;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 5px;
+        }
+
+        button.view-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button.view-button:hover {
+            background-color: #0056b3;
+        }
+
+
+        /* MODAL*/
+        .modal {
+            display: none;
+
+            position: fixed;
+
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Object List</h1>
+        <table id="objectTable">
+            <thead id="tableHead">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <!--MODAL-->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <h2>Informacion del Modelo</h2>
+            <p><strong>ID:</strong> <span id="modalId"></span></p>
+
+            <div class="form-group">
+                <label for="modalNameInput">Nombre:</label>
+                <input type="text" id="modalNameInput" />
+            </div>
+
+            <div class="action.buttons">
+                <button id="modalDeleteBtn" class="delete-button">Delete</button>
+                <button id="modalUpdateBtn" class="update-button">Update</button>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="container">
+        <h2>Add New Object</h2>
+        <form id="objectForm">
+            <div class="form-group">
+                <label for="nameInput">Object Name:</label>
+                <input id="nameInput" type="text" placeholder="Enter object name">
+            </div>
+            <button type="submit" class="add-button">Add Object</button>
+        </form>
+    </footer>
+
+    <script>
+        const url = 'https://api.restful-api.dev/objects';
+
+
+        function GetElements() {
+            return new Promise(function (resolve, reject) {
+                var request = new XMLHttpRequest()
+                request.open('GET', url)
+                request.responseType = 'json'
+                request.onload = function () {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(Error(request.statusText))
+                    }
+                }
+                request.onerror = function () {
+                    reject(Error('Error: unexpected network error.'))
+                }
+                request.send()
+            })
+
+        }
+
+        function ShowData() {
+            GetElements().then(response => {
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = ''
+                if (response && response.length > 0) {
+                    response.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.id = `row-${item.id}`;
+                        row.innerHTML = `
+                        <td id='id-${item.id}'>${item.id}</td>
+                        <td id='name-${item.id}'>${item.name}</td>
+                        <td></td>
+                    `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="3">No objects to display.</td></tr>';
+                }
+            }).catch(reason => {
+                console.error(reason)
+            })
+
+
+
+        }
+
+        ShowData();
+
+
+
+        function AddElement(Newdata) {
+            return new Promise(function (resolve, reject) {
+                var request = new XMLHttpRequest()
+                request.open('POST', url)
+                request.setRequestHeader('Content-Type', 'application/json')
+
+                var object = JSON.stringify(Newdata)
+                request.onload = function () {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(Error(request.statusText))
+                    }
+                }
+                request.onerror = function () {
+                    reject(Error('Error: unexpected network error.'))
+                }
+                request.send(object)
+            })
+        }
+
+        function UseAddElement(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('nameInput');
+            const newMobileName = nameInput.value.trim();
+            if (!newMobileName) {
+                alert('ERROR: Please enter a name to add.');
+                console.log('ERROR: Please enter a name to add.');
+                nameInput.focus()
+                return;
+            }
+            const newMobileData = {
+                name: newMobileName
+            };
+
+            AddElement(newMobileData).then((response) => {
+                var createdElement = JSON.parse(response)
+
+                const tableBody = document.getElementById('tableBody');
+                const newRow = document.createElement('tr');
+                newRow.id = `row-${createdElement.id}`;
+                newRow.innerHTML = `
+                        <td id='id-${createdElement.id}'>${createdElement.id}</td>
+                        <td id='name-${createdElement.id}'>${createdElement.name}</td>
+                        <td class="action-buttons">
+                            <button onclick="OpenModal('${createdElement.id}')" class="view-button">View</button>
+                        </td>
+                
+                    `;
+
+
+
+                tableBody.appendChild(newRow);
+                ClearInputs();
+
+
+            }).catch(reason => {
+                console.error(reason)
+            })
+
+        }
+        function OpenModal(id) {
+            var viewModal = document.getElementById("viewModal");
+            var closeModal = document.getElementById("closeModal");
+            var modalIdSpan = document.getElementById("modalId");
+            var modalNameInput = document.getElementById("modalNameInput");
+            var modalDeleteBtn = document.getElementById("modalDeleteBtn");
+            var modalUpdateBtn = document.getElementById("modalUpdateBtn");
+
+
+            modalIdSpan.textContent = id;
+            modalNameInput.value = document.getElementById(`name-${id}`).innerHTML
+            viewModal.style.display = "block";
+
+            closeModal.onclick = function () {
+                viewModal.style.display = "none";
+            };
+
+            window.onclick = function (event) {
+                if (event.target == viewModal) {
+                    viewModal.style.display = "none";
+                }
+            };
+
+            modalDeleteBtn.onclick = function () {
+                UseDeleteElement(id);
+                viewModal.style.display = "none";
+            }
+            modalUpdateBtn.onclick = function () {
+
+                UseUpdateElement(id, modalNameInput.value.trim());
+                viewModal.style.display = "none";
+            }
+
+
+
+        }
+        document.getElementById('objectForm').addEventListener('submit', UseAddElement);
+
+        function DeleteElement(id) {
+            return new Promise(function (resolve, reject) {
+                var request = new XMLHttpRequest()
+                request.open('DELETE', url + `/${id}`)
+                request.onload = function () {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(Error(request.statusText))
+                    }
+                }
+                request.onerror = function () {
+                    reject(Error('Error: unexpected network error.'))
+                }
+                request.send()
+            })
+        }
+
+        function UseDeleteElement(id) {
+            DeleteElement(id).then(() => {
+                const rowToDelete = document.getElementById(`row-${id}`);
+                if (rowToDelete) {
+                    rowToDelete.remove();
+                }
+            }).catch(reason => {
+                console.error(reason)
+            })
+        }
+
+        function UpdateElement(id, newName) {
+
+
+            const newMobileData = {
+                name: newName
+            };
+
+            return new Promise(function (resolve, reject) {
+                var request = new XMLHttpRequest()
+                request.open('PUT', url + `/${id}`)
+                request.setRequestHeader('Content-Type', 'application/json')
+                var object = JSON.stringify(newMobileData)
+                request.onload = function () {
+                    if (request.status == 200) {
+                        const parsedResponse = JSON.parse(request.response);
+                        resolve(parsedResponse);
+                    } else {
+                        reject(Error(request.statusText))
+                    }
+                }
+                request.onerror = function () {
+                    reject(Error('Error: unexpected network error.'))
+                }
+                request.send(object)
+            })
+
+        }
+
+        function UseUpdateElement(id, newName) {
+            UpdateElement(id, newName).then((objectValue) => {
+                document.getElementById(`id-${id}`).innerHTML = objectValue.id;
+                document.getElementById(`name-${id}`).innerHTML = objectValue.name;
+                ClearInputs()
+            }).catch(reason => {
+                console.error(reason)
+            })
+        }
+
+
+
+        function ClearInputs() {
+            document.getElementById('nameInput').value = '';
+            document.getElementById('newNameInput').value = '';
+        }
+
+    </script>
+</body>
+
+</html>
